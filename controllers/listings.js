@@ -46,42 +46,35 @@ module.exports.showListing = async (req, res, next) => {
 module.exports.createListing = async (req, res, next) => {
   try {
     if (!req.user) {
-      req.flash("error", "User not logged in!");
+      req.flash("error", "You must be logged in to create a listing.");
       return res.redirect("/login");
     }
 
-     const geoData = await getCoordinates(req.body.listing.location);
+    const geoData = await getCoordinates(req.body.listing.location);
 
-    if (!geoData || geoData.length === 0) {
-      req.flash("error", "Invalid location! Could not find coordinates.");
+    if (!geoData) {
+      req.flash("error", `Invalid location: "${req.body.listing.location}". Please enter a valid city or address.`);
       return res.redirect("/listings/new");
     }
 
     const newListing = new Listing(req.body.listing);
     newListing.owner = req.user._id;
+    newListing.image = req.file
+      ? { url: req.file.path, filename: req.file.filename }
+      : { url: "/default-image.jpg", filename: "default" };
 
-    if (req.file) {
-      newListing.image = {
-        url: req.file.path,
-        filename: req.file.filename
-      };
-    } else {
-      newListing.image = {
-        url: "/default-image.jpg",
-        filename: "default"
-      };
-    }
-
-     newListing.geometry = {
+    newListing.geometry = {
       type: "Point",
       coordinates: [parseFloat(geoData.lon), parseFloat(geoData.lat)]
     };
 
     await newListing.save();
-    req.flash("success", "New Listing Created!");
+    req.flash("success", "New listing created successfully!");
     return res.redirect(`/listings/${newListing._id}`);
   } catch (err) {
-    return next(err);
+    console.error(err);
+    req.flash("error", "Something went wrong while creating the listing.");
+    return res.redirect("/listings/new");
   }
 };
 
@@ -109,32 +102,34 @@ module.exports.updateListing = async (req, res, next) => {
     const listing = await Listing.findByIdAndUpdate(id, { ...req.body.listing }, { new: true });
 
     if (!listing) {
-      req.flash("error", "Listing not found");
+      req.flash("error", "Listing not found.");
       return res.redirect("/listings");
     }
 
-     // If location changed, update coordinates
     if (req.body.listing.location && req.body.listing.location !== listing.location) {
       const geoData = await getCoordinates(req.body.listing.location);
-      if (geoData) {
+      if (!geoData) {
+        req.flash("error", `Invalid location: "${req.body.listing.location}". Location not updated.`);
+      } else {
         listing.geometry = {
           type: "Point",
           coordinates: [parseFloat(geoData.lon), parseFloat(geoData.lat)]
         };
+        listing.location = req.body.listing.location;
       }
     }
+
     if (req.file) {
-      listing.image = {
-        url: req.file.path,
-        filename: req.file.filename
-      };
-      await listing.save();
+      listing.image = { url: req.file.path, filename: req.file.filename };
     }
 
-    req.flash("success", "Listing Updated");
+    await listing.save();
+    req.flash("success", "Listing updated successfully!");
     return res.redirect(`/listings/${id}`);
   } catch (err) {
-    return next(err);
+    console.error(err);
+    req.flash("error", "Something went wrong while updating the listing.");
+    return res.redirect(`/listings/${id}/edit`);
   }
 };
 
