@@ -22,7 +22,6 @@
       ></textarea>
       <div class="invalid-feedback">Please enter a short description</div>
    </div>
-   
    <div class="mb-3">
   <label for="image" class="form-label">Upload Image</label>
   <input 
@@ -30,6 +29,21 @@
   name="image" 
   class="form-control" required>
 </div>
+<div class="mb-3">
+  <label for="category" class="form-label">Category</label>
+  <select name="listing[category]" id="category" class="form-select" required>
+    <option value="" disabled selected>Select a category</option>
+    <option value="Mountains">Mountains</option>
+    <option value="Room">Room</option>
+    <option value="Iconic Cities">Iconic Cities</option>
+    <option value="Castle">Castle</option>
+    <option value="Arctic">Arctic</option>
+    <option value="Camping">Camping</option>
+    <option value="Farms">Farms</option>
+    <option value="Desert">Desert</option>
+  </select>
+</div>
+
    <div class="row">
     <div class="mb-3 col-md-4">
     <label for="price" class="form-label">Price</label>

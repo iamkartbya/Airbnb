@@ -3,12 +3,24 @@ const { getCoordinates } = require("../Utils/geocoder");
 
 
 // LISTINGS INDEX
-module.exports.index = async (req, res, next) => {
+module.exports.index = async (req, res) => {
   try {
-    const allListings = await Listing.find({});
-    return res.render("listings/index", { allListings });
+    const { category } = req.query;
+
+    const filter = (category && category !== "All")
+      ? { category }
+      : {};
+
+    const listings = await Listing.find(filter);
+
+    res.render("listings/index", {
+      listings,
+      selectedCategory: category || "All"
+    });
+
   } catch (err) {
-    return next(err);
+    req.flash("error", "Failed to load listings");
+    res.redirect("/");
   }
 };
 
@@ -96,60 +108,60 @@ module.exports.renderEditForm = async (req, res, next) => {
 };
 
 // UPDATE LISTING
-// controllers/listingController.js
 module.exports.updateListing = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const listing = await Listing.findByIdAndUpdate(id, { ...req.body.listing }, { new: true });
+
+    const listing = await Listing.findById(id);
 
     if (!listing) {
       req.flash("error", "Listing not found.");
       return res.redirect("/listings");
     }
 
-    // Update location geometry if changed
-    if (req.body.listing.location && req.body.listing.location !== listing.location) {
-      const geoData = await getCoordinates(req.body.listing.location);
+    const updatedData = req.body.listing;
+
+    // Update normal fields
+    listing.title = updatedData.title;
+    listing.description = updatedData.description;
+    listing.price = updatedData.price;
+    listing.country = updatedData.country;
+    listing.location = updatedData.location;
+    listing.category = updatedData.category;   // ⭐ Important
+
+    // Update coordinates
+    if (updatedData.location) {
+      const geoData = await getCoordinates(updatedData.location);
       if (geoData) {
         listing.geometry = {
           type: "Point",
-          coordinates: [parseFloat(geoData.lon), parseFloat(geoData.lat)] // [lng, lat] for GeoJSON
+          coordinates: [parseFloat(geoData.lon), parseFloat(geoData.lat)]
         };
-        listing.location = req.body.listing.location;
-      } else {
-        req.flash("error", `Invalid location: "${req.body.listing.location}". Location not updated.`);
       }
     }
 
-    // Update image if uploaded
+    // Update image only if new one uploaded
     if (req.file) {
-      listing.image = { url: req.file.path, filename: req.file.filename };
+      listing.image = {
+        url: req.file.path,
+        filename: req.file.filename
+      };
     }
 
     await listing.save();
 
-    // Emit live update via Socket.IO
-    const io = req.app.get("io");
-    io.emit("listingLocationUpdated", {
-      id: listing._id.toString(), // convert ObjectId to string
-      title: listing.title,
-      location: listing.location,
-      coordinates: listing.geometry.coordinates // [lng, lat]
-    });
-
-    console.log("📡 Emitting live update:", {
-      id: listing._id.toString(),
-      coordinates: listing.geometry.coordinates
-    });
-
     req.flash("success", "Listing updated successfully!");
-    return res.redirect(`/listings/${id}`);
+
+    // ⭐ Redirect to correct filtered category page
+    return res.redirect(`/listings?category=${listing.category}`);
+
   } catch (err) {
     console.error(err);
     req.flash("error", "Something went wrong while updating the listing.");
     return res.redirect(`/listings/${req.params.id}/edit`);
   }
 };
+
 
 // DELETE LISTING
 module.exports.destroyListing = async (req, res, next) => {

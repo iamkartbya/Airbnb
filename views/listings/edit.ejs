@@ -32,6 +32,18 @@
 <div class="mb-3">
     <img src="<%= originalImageUrl %>" class="img-fluid" style="width: 250px; object-fit: cover;" alt="Current Hotel Image">
 </div>
+<div class="mb-3">
+  <label for="category" class="form-label">Category</label>
+  <select name="listing[category]" id="category" class="form-select">
+    <% const categories = ["Room","Iconic Cities","Mountains","Castle","Arctic","Camping","Farms","Desert","Domes","Boats"]
+; %>
+    <% categories.forEach(cat => { %>
+      <option value="<%= cat %>" <%= listing.category === cat ? "selected" : "" %>>
+        <%= cat %>
+      </option>
+    <% }) %>
+  </select>
+</div>
 
 <div class="mb-3">
   <label for="image" class="form-label">Upload New Image</label>
@@ -75,7 +87,6 @@
         >
         <div class="invalid-feedback">Location should be valid</div>
       </div>
-
       <button class="btn btn-dark edit-btn mt-3">Edit</button>
     </form>
     <br/>

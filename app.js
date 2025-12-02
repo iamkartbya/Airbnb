@@ -1,6 +1,6 @@
 // ------------------ ENVIRONMENT ------------------
 if (process.env.NODE_ENV !== "production") {
-    require("dotenv").config(); // load .env locally
+    require("dotenv").config();
 }
 
 const express = require("express");
@@ -36,20 +36,8 @@ mongoose.connect(dbUrl)
     .then(() => console.log("✅ Connected to MongoDB Atlas"))
     .catch(err => console.error("MongoDB connection error:", err));
 
-// ------------------ VIEW ENGINE ------------------
-app.engine("ejs", ejsMate);
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
-
-// ------------------ MIDDLEWARE ------------------
-app.use(express.urlencoded({ extended: true }));
-app.use(methodOverride("_method"));
-app.use(express.static(path.join(__dirname, "public")));
-app.set("trust proxy", 1); // for secure cookies behind proxy (Render)
-
-// ------------------ SESSION SETUP ------------------
+// ------------------ SESSION STORE (Define BEFORE usage) ------------------
 const sessionSecret = process.env.SECRET || "mysupersecretcode";
-
 const MongoStore = require("connect-mongo");
 
 const store = MongoStore.default.create({
@@ -60,6 +48,7 @@ const store = MongoStore.default.create({
 
 store.on("error", e => console.log("MongoStore Error:", e));
 
+// ------------------ SESSION MIDDLEWARE ------------------
 app.use(session({
     store,
     secret: sessionSecret,
@@ -84,11 +73,22 @@ passport.deserializeUser(User.deserializeUser());
 
 // ------------------ GLOBAL LOCALS ------------------
 app.use((req, res, next) => {
-    res.locals.currentUser = req.user || null;
+    res.locals.currentUser = req.user || null;  // <-- fixes navbar error
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
     next();
 });
+
+// ------------------ VIEW ENGINE ------------------
+app.engine("ejs", ejsMate);
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+
+// ------------------ MIDDLEWARE ------------------
+app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride("_method"));
+app.use(express.static(path.join(__dirname, "public")));
+app.set("trust proxy", 1);  // render.com stuff
 
 // ------------------ ROUTES ------------------
 app.use("/listings", listingsRouter);
@@ -108,17 +108,13 @@ io.on("connection", socket => {
     console.log("🔵 Client connected:", socket.id);
 });
 
-// Example function to emit a live update (call after updating a listing)
+// helper function for live updates
 async function emitListingUpdate(listing) {
     const io = app.get("io");
     io.emit("listingLocationUpdated", {
         id: listing._id.toString(),
         title: listing.title,
         location: listing.location,
-        coordinates: listing.geometry.coordinates // [lng, lat]
-    });
-    console.log("📡 Emitting live update:", {
-        id: listing._id.toString(),
         coordinates: listing.geometry.coordinates
     });
 }
