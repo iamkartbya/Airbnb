@@ -22,13 +22,13 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.5/dist/leaflet.js"></script>
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
     <%- include("../includes/navbar.ejs") %>
 
-  <div class="container mt-3">
+  <main class=" flex-fill container mt-3">
     <%- include("../includes/flash.ejs") %>
     <%- body %>
-  </div>
+  </main>
 
   <%- include("../includes/footer.ejs") %>
     <!-- ✅ Bootstrap JS -->

@@ -114,7 +114,7 @@
                 </div>
               <%}%>
           </div>
-           <!-- Map Container -->
+  <!-- Map Container -->
 <div class="col-8 offset-2 mb-3">
     <h3>Where you'll be</h3>
     <div id="map" style="height: 500px; width: 100%; border-radius: 10px; margin-bottom:20px;"></div>
@@ -134,7 +134,7 @@
 <script>
     // Prepare all owner listings for the map
     const ownerListings = <%- JSON.stringify(ownerListings.map(l => ({
-        id: l._id,
+        id: l._id.toString(),
         title: l.title,
         location: l.location,
         coordinates: [l.geometry.coordinates[1], l.geometry.coordinates[0]] // [lat, lng]
@@ -144,7 +144,12 @@
     const currentListingId = "<%= listing._id %>";
 </script>
 
+
+<script>
+    window.currentListingId = "<%= listing._id %>";
+</script>
 <!-- Load map.js -->
+ <script src="/socket.io/socket.io.js"></script>
 <script src="/js/map.js"></script>
 
 <!-- Initialize the map -->

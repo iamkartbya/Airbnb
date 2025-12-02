@@ -5,9 +5,16 @@ body{
     min-height: 100vh;
 }
 
-.container{
-    flex: 1;
+.flash-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    width: 100%;
+    max-width: 400px;
 }
+
 /* NAvbar */
 .navbar{
     height: 5rem;
@@ -49,7 +56,7 @@ body{
 }
 .f-info{
     text-align: center;
-    height: 8rem;
+    height: 7rem;
     background-color:#ebebeb;
     display: flex;
     flex-wrap:wrap ;

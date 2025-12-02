@@ -96,6 +96,7 @@ module.exports.renderEditForm = async (req, res, next) => {
 };
 
 // UPDATE LISTING
+// controllers/listingController.js
 module.exports.updateListing = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -106,30 +107,47 @@ module.exports.updateListing = async (req, res, next) => {
       return res.redirect("/listings");
     }
 
+    // Update location geometry if changed
     if (req.body.listing.location && req.body.listing.location !== listing.location) {
       const geoData = await getCoordinates(req.body.listing.location);
-      if (!geoData) {
-        req.flash("error", `Invalid location: "${req.body.listing.location}". Location not updated.`);
-      } else {
+      if (geoData) {
         listing.geometry = {
           type: "Point",
-          coordinates: [parseFloat(geoData.lon), parseFloat(geoData.lat)]
+          coordinates: [parseFloat(geoData.lon), parseFloat(geoData.lat)] // [lng, lat] for GeoJSON
         };
         listing.location = req.body.listing.location;
+      } else {
+        req.flash("error", `Invalid location: "${req.body.listing.location}". Location not updated.`);
       }
     }
 
+    // Update image if uploaded
     if (req.file) {
       listing.image = { url: req.file.path, filename: req.file.filename };
     }
 
     await listing.save();
+
+    // Emit live update via Socket.IO
+    const io = req.app.get("io");
+    io.emit("listingLocationUpdated", {
+      id: listing._id.toString(), // convert ObjectId to string
+      title: listing.title,
+      location: listing.location,
+      coordinates: listing.geometry.coordinates // [lng, lat]
+    });
+
+    console.log("📡 Emitting live update:", {
+      id: listing._id.toString(),
+      coordinates: listing.geometry.coordinates
+    });
+
     req.flash("success", "Listing updated successfully!");
     return res.redirect(`/listings/${id}`);
   } catch (err) {
     console.error(err);
     req.flash("error", "Something went wrong while updating the listing.");
-    return res.redirect(`/listings/${id}/edit`);
+    return res.redirect(`/listings/${req.params.id}/edit`);
   }
 };
 
