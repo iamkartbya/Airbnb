@@ -15,6 +15,8 @@ const session = require("express-session");
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const GitHubStrategy = require('passport-github2').Strategy;
 const { Server } = require("socket.io");
 
 const User = require("./models/user");
@@ -70,6 +72,49 @@ app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
+
+
+// ------------------ GOOGLE ------------------
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_SECRET_KEY,
+    callbackURL: "/auth/google/callback"
+}, async (accessToken, refreshToken, profile, done) => {
+    try {
+        let user = await User.findOne({ googleId: profile.id });
+        if (!user) {
+            user = await User.create({
+                username: profile.displayName,
+                googleId: profile.id,
+                email: profile.emails[0].value
+            });
+        }
+        done(null, user);
+    } catch (err) {
+        done(err, null);
+    }
+}));
+
+// ------------------ GITHUB ------------------
+passport.use(new GitHubStrategy({
+    clientID: process.env.GITHUB_CLIENT_ID,
+    clientSecret: process.env.GITHUB_SECRET_KEY,
+    callbackURL: "/auth/github/callback"
+}, async (accessToken, refreshToken, profile, done) => {
+    try {
+        let user = await User.findOne({ githubId: profile.id });
+        if (!user) {
+            user = await User.create({
+                username: profile.username,
+                githubId: profile.id,
+                email: profile.emails[0]?.value || ""
+            });
+        }
+        done(null, user);
+    } catch (err) {
+        done(err, null);
+    }
+}));
 
 // ------------------ GLOBAL LOCALS ------------------
 app.use((req, res, next) => {

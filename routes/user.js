@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
-
 const wrapAsync = require("../Utils/wrapAsync");
 const passport = require("passport");
 const { saveRedirectUrl } = require("../middleware");
 const userController = require("../controllers/users");
 
+// ------------------ LOCAL AUTH ------------------
 router.route("/signup")
     .get(userController.renderSignupForm)
     .post(wrapAsync(userController.signup));
@@ -22,5 +22,27 @@ router.route("/login")
     );
 
 router.get("/logout", userController.logout);
+
+// ------------------ GOOGLE AUTH ------------------
+router.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+
+router.get("/auth/google/callback", 
+    passport.authenticate("google", { failureRedirect: "/login", failureFlash: true }),
+    (req, res) => {
+        req.flash("success", "Logged in with Google!");
+        res.redirect("/listings");
+    }
+);
+
+// ------------------ GITHUB AUTH ------------------
+router.get("/auth/github", passport.authenticate("github", { scope: ["user:email"] }));
+
+router.get("/auth/github/callback",
+    passport.authenticate("github", { failureRedirect: "/login", failureFlash: true }),
+    (req, res) => {
+        req.flash("success", "Logged in with GitHub!");
+        res.redirect("/listings");
+    }
+);
 
 module.exports = router;
