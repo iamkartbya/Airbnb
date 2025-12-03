@@ -1,174 +1,190 @@
-<% layout("layouts/boilerplate") %> 
-  <!-- <h3 class="mt-3">Algsl Listin</h3> -->
+<% layout("layouts/boilerplate") %>
+
 <style>
-  #filters{
-     display: flex;
-     flex-wrap: wrap;
-     align-items: center;
-  }
-  .filter{
-    text-align: center;
-    margin-right: 1.4rem;
-    margin-top: 1.5rem;
-    opacity: 0.7;
-  }
- 
-  .filter:hover{
-    opacity: 1;
-    cursor: pointer;
-  }
-  .filter p{
-    font-size: 0.8rem;
-  }
+/* ------------------- CATEGORY BAR ------------------- */
+#filters-wrapper {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 50;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border-radius: 3rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  overflow: hidden;
+}
 
-  .tax-info{
-    display: none;
+/* LEFT: scroll area */
+#filters-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+/* SCROLL AREA */
+#filters-scroll {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  gap: 1.5rem;
+  padding: 0.2rem 0;
+  scrollbar-width: none;
+  min-width: 0;
+}
+
+#filters-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* CATEGORY ITEM */
+.filter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.55;
+  cursor: pointer;
+  transition: 0.25s ease;
+  flex-shrink: 0;
+}
+
+.filter i {
+  font-size: 1.1rem;
+}
+
+.filter p {
+  font-size: 0.7rem;
+  margin-top: 0.15rem;
+  font-weight: 500;
+}
+
+.filter.active {
+  opacity: 1;
+  border-bottom: 2px solid black;
+  transform: scale(1.05);
+}
+
+/* TAX TOGGLE */
+.tax-toggle {
+  white-space: nowrap;
+  border: 1px solid #ccc;
+  border-radius: 2rem;
+  padding: 0.5rem 1rem;    
+  height: 3rem;            
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;     
+}
+
+/* LISTING CARDS */
+.listing-card {
+  margin-bottom: 25px;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s ease;
+}
+
+.listing-card:hover {
+  transform: scale(1.02);
+}
+
+.card-img-top {
+  height: 18rem;
+  object-fit: cover;
+}
+
+/* RESPONSIVE */
+@media(max-width: 768px) {
+  #filters-scroll {
+    gap: 1rem;
   }
-  .tax-toggle{
-    border:1px solid black;
-    border-radius: 1rem;
-    height: 3rem;
-    padding: 1rem;
-    margin-left: 3rem;
-    display: flex;
-    align-items: center;
-  }
+  .filter p { font-size: 0.65rem; }
+  .tax-toggle { padding: 0.25rem 0.8rem; font-size: 0.8rem; height: 2rem; }
+}
 </style>
-  <div id="filters" >
-    <div class="filter" data-category="All">
-    <div><i class="fa-solid fa-layer-group"></i></div>
-    <p>All</p>
-</div>
-     <div class="filter" data-category="Trending">
-    <div><i class="fa-solid fa-fire"></i></div>
-    <p>Trending</p>
-</div>
 
-<div class="filter" data-category="Room">
-    <div><i class="fa-solid fa-bed"></i></div>
-    <p>Room</p>
-</div>
-
-<div class="filter" data-category="Iconic Cities">
-    <div><i class="fa-solid fa-mountain-city"></i></div>
-    <p>Iconic Cities</p>
-</div>
-
-<div class="filter" data-category="Mountains">
-    <div><i class="fa-solid fa-mountain"></i></div>
-    <p>Mountains</p>
-</div>
-
-<div class="filter" data-category="Castle">
-    <div><i class="fa-brands fa-fort-awesome"></i></div>
-    <p>Castle</p>
-</div>
-
-<div class="filter" data-category="Arctic">
-    <div><i class="fa-solid fa-snowflake"></i></div>
-    <p>Arctic</p>
-</div>
-
-<div class="filter" data-category="Camping">
-    <div><i class="fa-solid fa-campground"></i></div>
-    <p>Camping</p>
-</div>
-
-<div class="filter" data-category="Farms">
-    <div><i class="fa-solid fa-cow"></i></div>
-    <p>Farms</p>
-</div>
-
-<div class="filter" data-category="Desert">
-    <div><i class="fa-solid fa-umbrella-beach"></i></div>
-    <p>Desert</p>
-</div>
-
-<div class="filter" data-category="Domes">
-    <div><i class="fa-solid fa-igloo"></i></div>
-    <p>Domes</p>
-</div>
-
-<div class="filter" data-category="Boats">
-    <div><i class="fa-solid fa-ship"></i></div>
-    <p>Boats</p>
-</div>
-
-     <div class="tax-toggle">
-  <div class="form-check form-check-reverse form-switch">
-  <label class="form-check-label" for="flexSwitchCheckDefault">
-    Display total after taxes
-  </label>
-  <input
-    class="form-check-input"
-    type="checkbox"
-    role="switch"
-    id="flexSwitchCheckDefault"
-  >
-      </div>
-     </div>
+<!-- ------------------- CATEGORY SCROLL BAR ------------------- -->
+<div id="filters-wrapper">
+  <div id="filters-left">
+    <div id="filters-scroll">
+      <!-- CATEGORIES -->
+      <div class="filter" data-category="All"><i class="fa-solid fa-layer-group"></i><p>All</p></div>
+      <div class="filter" data-category="Trending"><i class="fa-solid fa-fire"></i><p>Trending</p></div>
+      <div class="filter" data-category="Room"><i class="fa-solid fa-bed"></i><p>Room</p></div>
+      <div class="filter" data-category="Iconic Cities"><i class="fa-solid fa-city"></i><p>Cities</p></div>
+      <div class="filter" data-category="Mountains"><i class="fa-solid fa-mountain"></i><p>Mountains</p></div>
+      <div class="filter" data-category="Castle"><i class="fa-solid fa-chess-rook"></i><p>Castle</p></div>
+      <div class="filter" data-category="Arctic"><i class="fa-solid fa-snowflake"></i><p>Arctic</p></div>
+      <div class="filter" data-category="Camping"><i class="fa-solid fa-campground"></i><p>Camping</p></div>
+      <div class="filter" data-category="Farms"><i class="fa-solid fa-cow"></i><p>Farms</p></div>
+      <div class="filter" data-category="Desert"><i class="fa-solid fa-umbrella-beach"></i><p>Desert</p></div>
+      <div class="filter" data-category="Domes"><i class="fa-solid fa-igloo"></i><p>Domes</p></div>
+      <div class="filter" data-category="Boats"><i class="fa-solid fa-ship"></i><p>Boats</p></div>
+    </div>
   </div>
-  <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 mt-3">
-   <% for (let listing of listings) { %>
-  <div class="card col listing-card">
-    <a href="/listings/<%= listing._id %>" class="listing-link" style="text-decoration:none; color:inherit;">
-      <div class="col listing-card" style="width:22rem;">
-        <img
-          src="<%= listing.image && listing.image.url ? listing.image.url : '/images/default.jpg' %>"
-          class="card-img-top"
-          alt="<%= listing.title %>"
-          style="height:20rem; object-fit:cover;"
-        />
-        <div class="card-body">
-          <p class="card-text">
-            <b><%= listing.title %></b> <br>
-            &#8377; <%= listing.price ? listing.price.toLocaleString("en-IN") : "N/A" %> /night
-            <i class="tax-info">&nbsp; +18% GST</i>
-          </p>
+
+  <!-- TAX TOGGLE -->
+  <div class="tax-toggle">
+    <div class="form-check form-switch">
+      <label class="form-check-label me-2">Total after taxes</label>
+      <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
+    </div>
+  </div>
+</div>
+
+<!-- ------------------- LISTINGS GRID ------------------- -->
+<div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 mt-4">
+  <% for (let listing of listings) { %>
+    <div class="col">
+      <a href="/listings/<%= listing._id %>" class="listing-link" style="text-decoration:none; color:inherit;">
+        <div class="card listing-card">
+          <img src="<%= listing.image?.url || '/images/default.jpg' %>" class="card-img-top" alt="<%= listing.title %>" />
+          <div class="card-body">
+            <p class="card-text">
+              <b><%= listing.title %></b><br>
+              ₹ <%= listing.price?.toLocaleString("en-IN") || "N/A" %> / night
+              <i class="tax-info" style="display:none;"> +18% GST</i>
+            </p>
+          </div>
         </div>
-      </div>
-    </a>
-  </div>
-<% } %>
+      </a>
+    </div>
+  <% } %>
+</div>
 
-  </div>
-
-  <script>
+<script>
 document.addEventListener("DOMContentLoaded", () => {
-  
-  // --- Tax Toggle ---
-  let taxSwitch = document.getElementById("flexSwitchCheckDefault");
-  if (taxSwitch) {
-    taxSwitch.addEventListener("click", () => {
-      const taxInfo = document.getElementsByClassName("tax-info");
-      for (info of taxInfo) {
-        info.style.display = info.style.display !== "inline" ? "inline" : "none";
-      }
-    });
-  }
-
-  // --- Category Filters ---
-  document.querySelectorAll('.filter').forEach(filter => {
-    filter.addEventListener('click', () => {
-
-        document.querySelectorAll('.filter').forEach(f => f.classList.remove('active'));
-        filter.classList.add('active');
-
-        const cat = filter.dataset.category;
-
-        window.location.href = `/listings?category=${encodeURIComponent(cat)}`;
+  // TAX TOGGLE
+  document.getElementById("flexSwitchCheckDefault")?.addEventListener("click", () => {
+    document.querySelectorAll(".tax-info").forEach(info => {
+      info.style.display = info.style.display === "inline" ? "none" : "inline";
     });
   });
 
-  // --- Highlight selected category ---
-  let selected = "<%= selectedCategory %>";
-  if (!selected || selected === "") selected = "All";
+  // CATEGORY CLICK
+  document.querySelectorAll(".filter").forEach(filter => {
+    filter.addEventListener("click", () => {
+      document.querySelectorAll(".filter").forEach(f => f.classList.remove('active'));
+      filter.classList.add('active');
+      window.location.href = `/listings?category=${filter.dataset.category}`;
+    });
+  });
 
+  // MARK ACTIVE CATEGORY
+  let selected = "<%= selectedCategory %>" || "All";
   document.querySelectorAll(".filter").forEach(f => {
-      if (f.dataset.category === selected) {
-          f.classList.add("active");
-      }
+    if (f.dataset.category === selected) f.classList.add("active");
   });
 
+  // DRAG TO SCROLL
+  const scrollArea = document.getElementById("filters-scroll");
+  let isDown = false, startX, scrollLeft;
+  scrollArea.addEventListener("mousedown", e => { isDown = true; startX = e.pageX - scrollArea.offsetLeft; scrollLeft = scrollArea.scrollLeft; });
+  scrollArea.addEventListener("mouseup", () => isDown = false);
+  scrollArea.addEventListener("mouseleave", () => isDown = false);
+  scrollArea.addEventListener("mousemove", e => { if(!isDown) return; e.preventDefault(); scrollArea.scrollLeft = scrollLeft - (e.pageX - scrollArea.offsetLeft - startX)*2; });
 });
 </script>

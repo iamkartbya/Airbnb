@@ -1,5 +1,5 @@
 const express = require("express");
-const router = express.Router({ mergeParams: true }); // mergeParams needed to get listing ID
+const router = express.Router({ mergeParams: true });
 const wrapAsync = require("../Utils/wrapAsync.js");
 const reviewController = require("../controllers/reviews.js");
 const { isLoggedIn, isReviewAuthor, validateReview } = require("../middleware.js");

@@ -68,9 +68,10 @@ module.exports.createListing = async (req, res, next) => {
       req.flash("error", `Invalid location: "${req.body.listing.location}". Please enter a valid city or address.`);
       return res.redirect("/listings/new");
     }
-
+     
     const newListing = new Listing(req.body.listing);
     newListing.owner = req.user._id;
+    newListing.category = req.body.listing.category;
     newListing.image = req.file
       ? { url: req.file.path, filename: req.file.filename }
       : { url: "/default-image.jpg", filename: "default" };
@@ -118,7 +119,6 @@ module.exports.updateListing = async (req, res, next) => {
       req.flash("error", "Listing not found.");
       return res.redirect("/listings");
     }
-
     const updatedData = req.body.listing;
 
     // Update normal fields
