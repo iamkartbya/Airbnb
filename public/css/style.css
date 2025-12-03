@@ -5,6 +5,61 @@ body{
     min-height: 100vh;
 }
 
+.card {
+  border: none;
+}
+
+/* ------------------------------
+   GLOBAL RESPONSIVE FORM STYLES
+--------------------------------*/
+
+/* Small Devices (Phones < 576px) */
+@media (max-width: 575px) {
+  .card {
+    padding: 1.5rem !important;
+  }
+
+  .card h2 {
+    font-size: 1.4rem !important;
+  }
+
+  input.form-control {
+    font-size: 0.9rem !important;
+    padding: 0.5rem 0.8rem !important;
+  }
+
+  button.btn {
+    font-size: 0.95rem !important;
+    padding: 0.55rem !important;
+  }
+}
+
+/* Medium Devices (Tablets < 768px) */
+@media (max-width: 768px) {
+  .card {
+    width: 90% !important;
+  }
+}
+
+/* Larger Tablets & Small Laptops < 992px */
+@media (max-width: 992px) {
+  .card {
+    max-width: 460px !important;
+  }
+}
+
+/* Desktop Screens 1200px+ */
+@media (min-width: 1200px) {
+  .card {
+    max-width: 420px !important;
+  }
+}
+
+input:focus {
+  border-color: #fe424d !important;
+  box-shadow: 0 0 4px rgba(254, 66, 77, 0.4) !important;
+}
+
 .flash-container {
     position: fixed;
     bottom: 20px;

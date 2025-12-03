@@ -28,7 +28,7 @@ module.exports.isOwner = async (req, res, next) => {
     const listing = await Listing.findById(id);
 
     if (!listing) {
-      req.flash("error", "Listing not found!");
+      req.flash("error", "Hotel not found!");
       return res.redirect("/listings");
     }
 

@@ -19,7 +19,7 @@ module.exports.index = async (req, res) => {
     });
 
   } catch (err) {
-    req.flash("error", "Failed to load listings");
+    req.flash("error", "Failed to load Hotels");
     res.redirect("/");
   }
 };
@@ -42,7 +42,7 @@ module.exports.showListing = async (req, res, next) => {
       .populate("owner");
 
     if (!listing) {
-      req.flash("error", "Listing you requested does not exist.");
+      req.flash("error", "Hotel you requested does not exist.");
       return res.redirect("/listings");
     }
 
@@ -58,7 +58,7 @@ module.exports.showListing = async (req, res, next) => {
 module.exports.createListing = async (req, res, next) => {
   try {
     if (!req.user) {
-      req.flash("error", "You must be logged in to create a listing.");
+      req.flash("error", "You must be logged in to create a hotel.");
       return res.redirect("/login");
     }
 
@@ -82,11 +82,11 @@ module.exports.createListing = async (req, res, next) => {
     };
 
     await newListing.save();
-    req.flash("success", "New listing created successfully!");
+    req.flash("success", "New hotel created successfully!");
     return res.redirect(`/listings/${newListing._id}`);
   } catch (err) {
     console.error(err);
-    req.flash("error", "Something went wrong while creating the listing.");
+    req.flash("error", "Something went wrong while creating the hotel.");
     return res.redirect("/listings/new");
   }
 };
@@ -98,7 +98,7 @@ module.exports.renderEditForm = async (req, res, next) => {
     const listing = await Listing.findById(id);
 
     if (!listing) {
-      req.flash("error", "Listing not found");
+      req.flash("error", "Hotel not found");
       return res.redirect("/listings");
     }
   let originalImageUrl=listing.image.url;
@@ -116,7 +116,7 @@ module.exports.updateListing = async (req, res, next) => {
     const listing = await Listing.findById(id);
 
     if (!listing) {
-      req.flash("error", "Listing not found.");
+      req.flash("error", "Hotel not found.");
       return res.redirect("/listings");
     }
     const updatedData = req.body.listing;
@@ -150,7 +150,7 @@ module.exports.updateListing = async (req, res, next) => {
 
     await listing.save();
 
-    req.flash("success", "Listing updated successfully!");
+    req.flash("success", "Hotel updated successfully!");
 
     // ⭐ Redirect to correct filtered category page
     return res.redirect(`/listings?category=${listing.category}`);
@@ -170,11 +170,11 @@ module.exports.destroyListing = async (req, res, next) => {
     const listing = await Listing.findByIdAndDelete(id);
 
     if (!listing) {
-      req.flash("error", "Listing not found");
+      req.flash("error", "Hotel not found");
       return res.redirect("/listings");
     }
 
-    req.flash("success", "Listing Deleted");
+    req.flash("success", "Hotel Deleted");
     return res.redirect("/listings");
   } catch (err) {
     return next(err);
