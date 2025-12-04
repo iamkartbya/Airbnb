@@ -14,6 +14,7 @@
   align-items: center;
   gap: 1rem;
   overflow: hidden;
+  flex-wrap: wrap;
 }
 
 /* LEFT: scroll area */
@@ -49,14 +50,15 @@
   cursor: pointer;
   transition: 0.25s ease;
   flex-shrink: 0;
+  padding: 0.3rem;
 }
 
 .filter i {
-  font-size: 1.1rem;
+  font-size: 1.3rem;
 }
 
 .filter p {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   margin-top: 0.15rem;
   font-weight: 500;
 }
@@ -64,7 +66,7 @@
 .filter.active {
   opacity: 1;
   border-bottom: 2px solid black;
-  transform: scale(1.05);
+  transform: scale(1.1);
 }
 
 /* TAX TOGGLE */
@@ -77,11 +79,12 @@
   display: flex;
   align-items: center;
   font-size: 0.9rem;     
+  margin-left: auto;
 }
 
 /* LISTING CARDS */
 .listing-card {
-  margin-bottom: 25px;
+  margin-bottom: 20px;
   border-radius: 12px;
   overflow: hidden;
   transition: transform 0.2s ease;
@@ -92,17 +95,67 @@
 }
 
 .card-img-top {
-  height: 18rem;
+  width: 100%;
+  height: 15rem;
   object-fit: cover;
 }
 
 /* RESPONSIVE */
-@media(max-width: 768px) {
+/* LISTING CARDS RESPONSIVE */
+@media(max-width: 480px) {
+  .row > .col {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+@media(min-width: 481px) and (max-width: 768px) {
+  .row > .col {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+}
+
+@media(min-width: 769px) and (max-width: 1024px) {
+  .row > .col {
+    flex: 0 0 33.3333%;
+    max-width: 33.3333%;
+  }
+}
+
+@media(min-width: 1025px) {
+  .row > .col {
+    flex: 0 0 33.3333%;
+    max-width: 33.3333%;
+  }
+}
+
+@media(max-width: 1024px) {
   #filters-scroll {
     gap: 1rem;
   }
+  .filter i { font-size: 1.2rem; }
+  .filter p { font-size: 0.7rem; }
+  .tax-toggle { font-size: 0.85rem; padding: 0.4rem 0.8rem; height: 2.8rem; }
+  .card-img-top { height: 14rem; }
+}
+
+@media(max-width: 768px) {
+  #filters-wrapper { flex-direction: column; align-items: flex-start; padding: 0.5rem; gap: 0.5rem; }
+  #filters-left { width: 100%; }
+  #filters-scroll { gap: 0.8rem; }
+  .filter i { font-size: 1.1rem; }
   .filter p { font-size: 0.65rem; }
-  .tax-toggle { padding: 0.25rem 0.8rem; font-size: 0.8rem; height: 2rem; }
+  .tax-toggle { width: 100%; justify-content: flex-start; padding: 0.35rem 0.8rem; font-size: 0.8rem; height: 2.5rem; }
+  .listing-card:hover { transform: none; }
+  .card-img-top { height: 12rem; }
+}
+
+@media(max-width: 480px) {
+  .filter i { font-size: 1rem; }
+  .filter p { font-size: 0.6rem; }
+  .tax-toggle { font-size: 0.75rem; height: 2.2rem; padding: 0.3rem 0.6rem; }
+  .card-img-top { height: 10rem; }
 }
 </style>
 
@@ -111,18 +164,14 @@
   <div id="filters-left">
     <div id="filters-scroll">
       <!-- CATEGORIES -->
-      <div class="filter" data-category="All"><i class="fa-solid fa-layer-group"></i><p>All</p></div>
-      <div class="filter" data-category="Trending"><i class="fa-solid fa-fire"></i><p>Trending</p></div>
-      <div class="filter" data-category="Room"><i class="fa-solid fa-bed"></i><p>Room</p></div>
-      <div class="filter" data-category="Iconic Cities"><i class="fa-solid fa-city"></i><p>Cities</p></div>
-      <div class="filter" data-category="Mountains"><i class="fa-solid fa-mountain"></i><p>Mountains</p></div>
-      <div class="filter" data-category="Castle"><i class="fa-solid fa-chess-rook"></i><p>Castle</p></div>
-      <div class="filter" data-category="Arctic"><i class="fa-solid fa-snowflake"></i><p>Arctic</p></div>
-      <div class="filter" data-category="Camping"><i class="fa-solid fa-campground"></i><p>Camping</p></div>
-      <div class="filter" data-category="Farms"><i class="fa-solid fa-cow"></i><p>Farms</p></div>
-      <div class="filter" data-category="Desert"><i class="fa-solid fa-umbrella-beach"></i><p>Desert</p></div>
-      <div class="filter" data-category="Domes"><i class="fa-solid fa-igloo"></i><p>Domes</p></div>
-      <div class="filter" data-category="Boats"><i class="fa-solid fa-ship"></i><p>Boats</p></div>
+      <% const categories = ["All","Trending","Room","Iconic Cities","Mountains","Castle","Arctic","Camping","Farms","Desert","Domes","Boats"]; %>
+      <% const icons = ["fa-layer-group","fa-fire","fa-bed","fa-city","fa-mountain","fa-chess-rook","fa-snowflake","fa-campground","fa-cow","fa-umbrella-beach","fa-igloo","fa-ship"]; %>
+      <% categories.forEach((cat, i) => { %>
+        <div class="filter" data-category="<%= cat %>">
+          <i class="fa-solid <%= icons[i] %>"></i>
+          <p><%= cat === "Iconic Cities" ? "Cities" : cat %></p>
+        </div>
+      <% }) %>
     </div>
   </div>
 
@@ -136,7 +185,7 @@
 </div>
 
 <!-- ------------------- LISTINGS GRID ------------------- -->
-<div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 mt-4">
+<div class="row g-3 mt-4">
   <% for (let listing of listings) { %>
     <div class="col">
       <a href="/listings/<%= listing._id %>" class="listing-link" style="text-decoration:none; color:inherit;">
