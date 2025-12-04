@@ -9,42 +9,42 @@ const listingSchema = new Schema({
     },
     description: String,
     image: {
-        url: {
-        type: String,
+        url: { type: String },
+        filename: { type: String },
     },
-    filename: { type: String },   
-},
     price: Number,
     location: String,
     country: String,
-    reviews:[
+    reviews: [
         {
             type: Schema.Types.ObjectId,
-            ref:"Review",
+            ref: "Review",
         },
     ],
-    owner:{
-        type:Schema.Types.ObjectId,
-        ref:"User",
-        required:true
-    },
-    geometry: {
-    type: {
-        type: String,
-        enum: ['Point'],
-        required:true
-    },
-    coordinates: {
-        type: [Number],
+    owner: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
         required: true
     },
-  },
-  category: {
-    type: String,
-    enum: ["Room","Iconic Cities","Mountains","Castle","Arctic","Camping","Farms","Desert","Domes","Boats"],
-    
-}
+    geometry: {
+        type: {
+            type: String,
+            enum: ['Point'],
+            required: true
+        },
+        coordinates: {
+            type: [Number],
+            required: true
+        },
+    },
+    category: {
+        type: String,
+        enum: ["Room","Iconic Cities","Mountains","Castle","Arctic","Camping","Farms","Desert","Domes","Boats"],
+    },
+    petsAllowed: { type: Boolean, default: false },
+    smokingAllowed: { type: Boolean, default: false }
 });
+
 
 listingSchema.post("findOneAndDelete",async(listing)=>{
     if(listing){

@@ -3,24 +3,19 @@ const { cloudinary } = require("../cloudConfig");
 
 // ------------------ SIGNUP ------------------
 module.exports.renderSignupForm = (req, res) => {
-    res.render("users/signup");
+    res.render("users/signup.ejs");
 };
 
 module.exports.signup = async (req, res, next) => {
     try {
         const { username, email, password } = req.body;
-
-        const newUser = new User({
-            username,
-            email,
-            name: username,
-        });
+        const newUser = new User({ email, username, name: username });
 
         const registeredUser = await User.register(newUser, password);
 
         req.login(registeredUser, (err) => {
             if (err) return next(err);
-            req.flash("success", "Welcome to RestAura Homes!");
+            req.flash("success", "Welcome to Wanderlust!");
             res.redirect("/listings");
         });
 
@@ -32,11 +27,11 @@ module.exports.signup = async (req, res, next) => {
 
 // ------------------ LOGIN ------------------
 module.exports.renderLoginForm = (req, res) => {
-    res.render("users/login");
+    res.render("users/login.ejs");
 };
 
 module.exports.login = (req, res) => {
-    req.flash("success", "Logged in successfully!");
+    req.flash("success", "Welcome back!");
     const redirectUrl = res.locals.redirectUrl || "/listings";
     res.locals.redirectUrl = null;
     res.redirect(redirectUrl);
@@ -46,13 +41,12 @@ module.exports.login = (req, res) => {
 module.exports.logout = (req, res, next) => {
     req.logout((err) => {
         if (err) return next(err);
-        req.flash("success", "Logged out successfully!");
+        req.flash("success", "You are logged out!");
         res.redirect("/listings");
     });
 };
 
 // ------------------ PROFILE ------------------
-
 module.exports.showProfile = (req, res) => {
     if (!req.user) return res.redirect("/login");
     res.render("users/profile", { currentUser: req.user });
@@ -66,16 +60,16 @@ module.exports.renderEditProfileForm = (req, res) => {
 module.exports.updateProfile = async (req, res) => {
     if (!req.user) return res.redirect("/login");
 
-    const { name, email, bio, language, currency } = req.body;
+    const { name, email } = req.body;
 
-    const updatedData = { name, email, bio, language, currency };
+    const updatedData = { 
+        name,
+        email
+    };
 
     // If new avatar uploaded
     if (req.file) {
-        updatedData.avatar = {
-            url: req.file.path,
-            filename: req.file.filename
-        };
+        updatedData.avatar = req.file.path;  // ⭐ Cloudinary URL
     }
 
     await User.findByIdAndUpdate(req.user._id, updatedData, { new: true });
@@ -83,4 +77,3 @@ module.exports.updateProfile = async (req, res) => {
     req.flash("success", "Profile updated successfully!");
     res.redirect("/profile");
 };
-

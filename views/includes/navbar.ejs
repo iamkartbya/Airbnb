@@ -1,4 +1,5 @@
 <style>
+  /* Search button styling */
   .search-btn {
     background-color: #fe424d;
     color: #fff;
@@ -8,64 +9,110 @@
     align-items: center;
     gap: 8px;
     font-size: 16px;
+    transition: 0.3s;
   }
-
   .search-btn:hover {
-    background-color: #fe424d;
+    background-color: #c8373f;
     color: #fff;
   }
 
+  /* Search input styling */
   .search-inp {
     border-radius: 25px;
     padding: 0.5rem 3rem;
     font-size: 1rem;
   }
+
+  /* Profile avatar */
+  .profile-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #fe424d;
+  }
+
+  /* Dropdown arrow spacing */
+  .dropdown-toggle::after {
+    margin-left: 0.3em;
+  }
+
+  /* Dropdown icon alignment */
+  .dropdown-menu a.dropdown-item i {
+    width: 20px;
+    text-align: center;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 767px) {
+    .profile-avatar {
+      width: 28px;
+      height: 28px;
+    }
+    .dropdown-toggle span {
+      display: none;
+    }
+    .search-inp {
+      padding: 0.5rem 1.5rem;
+    }
+    .search-btn {
+      padding: 6px 15px;
+      font-size: 14px;
+    }
+  }
 </style>
 
 <nav class="navbar navbar-expand-md bg-body-light border-bottom sticky-top">
   <div class="container-fluid">
-    <a class="navbar-brand" href="/listings"><i class="fa-regular fa-compass"></i></a>
+    <a class="navbar-brand" href="/listings">
+      <i class="fa-regular fa-compass" style="color:#fe424d;"></i>
+    </a>
+<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup">
+  <span class="navbar-toggler-icon"></span>
+</button>
 
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#navbarNavAltMarkup"
-    >
-      <span class="navbar-toggler-icon"></span>
-    </button>
+<div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+  <!-- Left links -->
+  <div class="navbar-nav">
+    <a class="nav-link" href="/listings">Our Hotels</a>
+  </div>
 
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      
-      <div class="navbar-nav">
-        <a class="nav-link" href="/listings"> Our Hotels</a>
+  <!-- Center search form -->
+  <div class="navbar-nav ms-auto me-3">
+    <form class="d-flex" role="search">
+      <input class="form-control me-2 search-inp" type="search" placeholder="Search destinations" aria-label="Search">
+      <button class="btn search-btn" type="submit">
+        <i class="fa-solid fa-magnifying-glass"></i> Search
+      </button>
+    </form>
+  </div>
+
+  <!-- Right links -->
+  <div class="navbar-nav ms-auto">
+    <a class="nav-link" href="/listings/new">RestAura your home</a>
+
+    <% if(!currentUser){ %>
+      <a class="nav-link" href="/signup"><b>Sign up</b></a>
+      <a class="nav-link" href="/login"><b>Login</b></a>
+    <% } %>
+
+    <% if(currentUser){ %>
+      <div class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <span class="d-none d-md-inline">
+            <%= currentUser.name && currentUser.name !== "New User" ? currentUser.name : currentUser.username %>
+          </span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+          <li><a class="dropdown-item" href="/profile"><i class="fa-regular fa-user me-2"></i>Profile</a></li>
+          <li><a class="dropdown-item" href="/listings/my"><i class="fa-solid fa-house me-2"></i>My Listings</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" href="/logout"><i class="fa-solid fa-right-from-bracket me-2"></i>Logout</a></li>
+        </ul>
       </div>
+    <% } %>
+  </div>
+</div>
 
-      <!-- FIXED spelling here -->
-      <div class="navbar-nav ms-auto">
-        <form class="d-flex" role="search">
-          <input class="form-control me-2 search-inp"
-            type="search"
-            placeholder="Search destinations"
-            aria-label="Search">
-          <button class="btn search-btn" type="submit">
-            <i class="fa-solid fa-magnifying-glass"></i> Search
-          </button>
-        </form>
-      </div>
-
-      <div class="navbar-nav ms-auto">
-        <a class="nav-link" href="/listings/new">RestAura your home</a>
-
-        <% if(!currentUser){ %>
-          <a class="nav-link" href="/signup"><b>Sign up</b></a>
-          <a class="nav-link" href="/login"><b>Login</b></a>
-        <% } %>
-
-        <% if(currentUser){ %>
-          <a class="nav-link" href="/logout"><b>Log Out</b></a>
-        <% } %>
-      </div>
-    </div>
   </div>
 </nav>

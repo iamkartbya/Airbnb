@@ -1,0 +1,129 @@
+<% layout("layouts/boilerplate") %>
+
+<div class="container mt-5">
+  <h2 class="mb-4 fw-bold">My Listings</h2>
+
+  <% if(!listings || listings.length === 0){ %>
+    <div class="text-center py-5">
+      <h5 class="text-muted mb-3">You haven't listed any properties yet.</h5>
+      <a href="/listings/new" class="btn btn-primary px-4 py-2">+ Add a Listing</a>
+    </div>
+  <% } else { %>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+      <% listings.forEach(listing => { %>
+        <div class="col">
+          <div class="listing-card shadow-sm">
+            
+            <!-- IMAGE -->
+            <div class="listing-img-wrapper">
+              <img 
+                src="<%= listing.image?.url || '/images/default-listing.jpg' %>" 
+                class="listing-img"
+                alt="<%= listing.title %>">
+
+              <!-- PRICE BADGE -->
+              <span class="price-tag">₹<%= listing.price %> / night</span>
+            </div>
+
+            <!-- CONTENT -->
+            <div class="card-body">
+              <h5 class="card-title mb-1"><%= listing.title %></h5>
+              <p class="text-muted small mb-2"><%= listing.location %></p>
+              <p class="card-desc"><%= listing.description %></p>
+            </div>
+
+            <!-- FOOTER -->
+            <div class="card-footer bg-white border-0 d-flex justify-content-between align-items-center">
+
+              <span class="rating-badge mb-3 mx-2">
+                <i class="fa-solid fa-star text-warning"></i> 
+                <%= listing.reviews?.length || 0 %> reviews
+              </span>
+
+              <% if(currentUser && listing.owner && currentUser._id.toString() === listing.owner._id.toString()) { %>
+                <div>
+                  <a href="/listings/<%= listing._id %>/edit" class="btn btn-sm btn-outline-primary mb-3">Edit</a>
+
+                  <form action="/listings/<%= listing._id %>?_method=DELETE" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-sm btn-outline-danger mb-3" 
+                      onclick="return confirm('Are you sure you want to delete this listing?');">
+                      Delete
+                    </button>
+                  </form>
+                </div>
+              <% } %>
+
+            </div>
+
+          </div>
+        </div>
+      <% }); %>
+    </div>
+
+  <% } %>
+</div>
+
+<style>
+/* CARD CONTAINER */
+.listing-card {
+  border-radius: 15px;
+  overflow: hidden;
+  background: #fff;
+  transition: 0.25s ease-in-out;
+  position: relative;
+}
+
+.listing-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+}
+
+/* IMAGE WRAPPER */
+.listing-img-wrapper {
+  position: relative;
+}
+
+.listing-img {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  border-bottom: 1px solid #eee;
+}
+
+/* PRICE TAG */
+.price-tag {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: #fe424d;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 25px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* DESCRIPTION (LIMIT LINES) */
+.card-desc {
+  height: 3.2em; 
+  overflow: hidden;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* RATING BADGE */
+.rating-badge {
+  font-size: 0.85rem;
+  color: #555;
+  background: #f8f9fa;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+/* BUTTONS */
+.btn-outline-primary, .btn-outline-danger {
+  font-size: 0.75rem;
+  padding: 4px 10px;
+}
+</style>

@@ -1,7 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const wrapAsync = require("../Utils/wrapAsync");
 const passport = require("passport");
+const multer = require("multer");
+const { storage } = require("../cloudConfig");
+const upload = multer({ storage });
+
+const wrapAsync = require("../Utils/wrapAsync");
 const { saveRedirectUrl } = require("../middleware");
 const userController = require("../controllers/users");
 
@@ -21,12 +25,24 @@ router.route("/login")
         userController.login
     );
 
+// ------------------ PROFILE ------------------
+router.get("/profile", userController.showProfile);
+router.get("/profile/edit", userController.renderEditProfileForm);
+router.post("/profile/edit",
+    upload.single("avatar"),
+    wrapAsync(userController.updateProfile)
+);
+
+
+// ------------------ LOGOUT ------------------
 router.get("/logout", userController.logout);
 
 // ------------------ GOOGLE AUTH ------------------
-router.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+router.get("/auth/google",
+    passport.authenticate("google", { scope: ["profile", "email"] })
+);
 
-router.get("/auth/google/callback", 
+router.get("/auth/google/callback",
     passport.authenticate("google", { failureRedirect: "/login", failureFlash: true }),
     (req, res) => {
         req.flash("success", "Logged in with Google!");
@@ -34,8 +50,11 @@ router.get("/auth/google/callback",
     }
 );
 
+
 // ------------------ GITHUB AUTH ------------------
-router.get("/auth/github", passport.authenticate("github", { scope: ["user:email"] }));
+router.get("/auth/github",
+    passport.authenticate("github", { scope: ["user:email"] })
+);
 
 router.get("/auth/github/callback",
     passport.authenticate("github", { failureRedirect: "/login", failureFlash: true }),

@@ -1,0 +1,146 @@
+<% layout("layouts/boilerplate") %>
+
+<div class="container py-4">
+  <div class="row g-4 justify-content-center">
+    <!-- LEFT SIDE = PROFILE SUMMARY -->
+    <div class="col-lg-4 col-md-6 col-sm-12">
+
+      <!-- PROFILE CARD -->
+      <div class="card shadow-sm p-4 text-center mb-4">
+        <img src="<%= currentUser.avatar || '/images/default-avatar.png' %>" 
+             class="profile-avatar mb-3" alt="avatar">
+        <h4 class="fw-semibold mb-1">
+          <%= currentUser.name && currentUser.name !== "New User" 
+                ? currentUser.name 
+                : currentUser.username %>
+        </h4>
+        <p class="text-muted small mb-1"><%= currentUser.email %></p>
+        <p class="text-muted small mb-2">
+          Member since: <%= currentUser.createdAt ? currentUser.createdAt.toDateString() : "Unknown" %>
+        </p>
+
+        <div class="d-grid gap-2 mt-3">
+          <a href="/profile/edit" class="btn btn-outline-primary">
+            <i class="fa-regular fa-pen-to-square me-1"></i> Edit Profile
+          </a>
+          <a href="/listings/my" class="btn btn-outline-secondary">
+            <i class="fa-solid fa-house me-1"></i> My Listings
+          </a>
+          <a href="/logout" class="btn btn-danger text-white" style="background:#fe424d; border:#fe424d;">
+            <i class="fa-solid fa-right-from-bracket me-1"></i> Logout
+          </a>
+        </div>
+      </div>
+
+      <!-- ABOUT CARD -->
+      <div class="card shadow-sm p-3 mb-4">
+        <h6 class="fw-semibold mb-2">About</h6>
+        <p class="small text-muted mb-0"><%= currentUser.bio || "No bio added yet." %></p>
+      </div>
+
+      <!-- CONNECTED ACCOUNTS -->
+      <div class="card shadow-sm p-3 mb-4">
+        <h6 class="fw-semibold mb-3">Connected Accounts</h6>
+        <div class="d-flex flex-column gap-2 small">
+          <div>Email: <span class="badge bg-success ms-2">Verified</span></div>
+          <div>Google: <span class="text-muted ms-2">Not connected</span></div>
+          <div>GitHub: <span class="text-muted ms-2">Not connected</span></div>
+        </div>
+      </div>
+
+    </div> <!-- END LEFT -->
+
+    <!-- RIGHT SIDE = DASHBOARD -->
+    <div class="col-lg-8 col-md-6 col-sm-12">
+
+      <!-- QUICK LINKS -->
+      <div class="card shadow-sm p-3 mb-4">
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+          <a href="/listings/new" class="btn btn-outline-primary">Create Listing</a>
+          <a href="/messages" class="btn btn-outline-secondary">Messages</a>
+          <a href="/bookings" class="btn btn-outline-secondary">My Bookings</a>
+        </div>
+      </div>
+
+      <!-- BOOKINGS SUMMARY -->
+      <div class="card shadow-sm p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-semibold mb-0">Bookings</h5>
+          <a href="/bookings" class="small text-decoration-none">View all</a>
+        </div>
+        <div class="row text-center">
+          <div class="col-4">
+            <div class="fs-4 fw-bold"><%= currentUser.upcomingCount || 0 %></div>
+            <div class="text-muted small">Upcoming</div>
+          </div>
+          <div class="col-4">
+            <div class="fs-4 fw-bold"><%= currentUser.completedCount || 0 %></div>
+            <div class="text-muted small">Completed</div>
+          </div>
+          <div class="col-4">
+            <div class="fs-4 fw-bold"><%= currentUser.cancelledCount || 0 %></div>
+            <div class="text-muted small">Cancelled</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECENT ACTIVITY -->
+      <div class="card shadow-sm p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="fw-semibold mb-0">Recent Activity</h5>
+          <a href="/reviews" class="small text-decoration-none">See all</a>
+        </div>
+        <div class="mt-3 small text-muted">
+          <% if (currentUser.recentActivity && currentUser.recentActivity.length) { %>
+            <ul class="list-unstyled mb-0">
+              <% currentUser.recentActivity.forEach(act => { %>
+                <li class="py-2 border-bottom"><%= act %></li>
+              <% }) %>
+            </ul>
+          <% } else { %>
+            <p class="mb-0">No activity yet.</p>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- PREFERENCES & SECURITY -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-6 col-sm-12">
+          <div class="card shadow-sm p-3 h-100">
+            <h6 class="fw-semibold">Preferences</h6>
+            <div class="small text-muted mt-2">
+              <div>Language: <strong><%= currentUser.language || "English" %></strong></div>
+              <div>Currency: <strong><%= currentUser.currency || "INR" %></strong></div>
+              <div class="mt-2"><a href="/preferences">Manage preferences</a></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-sm-12">
+          <div class="card shadow-sm p-3 h-100">
+            <h6 class="fw-semibold">Security</h6>
+            <div class="small text-muted mt-2">
+              <div><a href="/profile/change-password">Change password</a></div>
+              <div class="mt-2"><a href="/profile/sessions">Login activity</a></div>
+              <div class="mt-2 text-danger"><a href="/profile/delete" class="text-danger">Delete account</a></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div> <!-- END RIGHT -->
+
+  </div>
+</div>
+
+<style>
+  .profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #fe424d;
+  }
+  .card { border-radius: 12px; }
+  a.btn-outline-primary { color: #fe424d; border-color: #fe424d; }
+  a.btn-outline-primary:hover { background:#fe424d; color:#fff; }
+</style>

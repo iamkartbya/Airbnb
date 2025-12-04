@@ -1,182 +1,159 @@
 const Listing = require("../models/listing");
+const Review = require("../models/review");
 const { getCoordinates } = require("../Utils/geocoder");
 
+// ---------------- HELPER ----------------
+module.exports.getListingsByOwner = async (ownerId) => {
+    return await Listing.find({ owner: ownerId }).populate("owner");
+};
 
-// LISTINGS INDEX
+// ---------------- INDEX ----------------
 module.exports.index = async (req, res) => {
-  try {
     const { category } = req.query;
-
-    const filter = (category && category !== "All")
-      ? { category }
-      : {};
-
-    const listings = await Listing.find(filter);
-
-    res.render("listings/index", {
-      listings,
-      selectedCategory: category || "All"
-    });
-
-  } catch (err) {
-    req.flash("error", "Failed to load Hotels");
-    res.redirect("/");
-  }
+    const filter = (category && category !== "All") ? { category } : {};
+    const listings = await Listing.find(filter).populate("owner");
+    res.render("listings/index", { listings, selectedCategory: category || "All", currentUser: req.user });
 };
 
-// NEW FORM
+// ---------------- NEW FORM ----------------
 module.exports.renderNewForm = (req, res) => {
-  return res.render("listings/new.ejs");
+    res.render("listings/new");
 };
 
-// SHOW LISTING
-module.exports.showListing = async (req, res, next) => {
-  try {
+// ---------------- SHOW ----------------
+// ---------------- SHOW ----------------
+module.exports.showListing = async (req, res) => {
     const { id } = req.params;
-
     const listing = await Listing.findById(id)
-      .populate({
-        path: "reviews",
-        populate: { path: "author" }
-      })
-      .populate("owner");
+        .populate({ path: "reviews", populate: { path: "author" } })
+        .populate("owner");
 
     if (!listing) {
-      req.flash("error", "Hotel you requested does not exist.");
-      return res.redirect("/listings");
+        req.flash("error", "Listing not found");
+        return res.redirect("/listings");
     }
 
-    const ownerListings = await Listing.find({ owner: listing.owner._id });
+    // Fetch other listings by the same owner (exclude current listing)
+   let ownerListings = [];
+    if(listing.owner){
+        ownerListings = await Listing.find({ owner: listing.owner._id }).populate("owner");
+    }
 
-    return res.render("listings/show", { listing, ownerListings });
-  } catch (err) {
-    return next(err);
-  }
+    // Safe check for owner
+    const isOwner = req.user && listing.owner && req.user._id.toString() === listing.owner._id.toString();
+
+    res.render("listings/show", { listing, currentUser: req.user, isOwner, ownerListings });
 };
 
-// CREATE LISTING
-module.exports.createListing = async (req, res, next) => {
-  try {
-    if (!req.user) {
-      req.flash("error", "You must be logged in to create a hotel.");
-      return res.redirect("/login");
-    }
+// ---------------- CREATE ----------------
+module.exports.createListing = async (req, res) => {
+    if (!req.user) return res.redirect("/login");
 
     const geoData = await getCoordinates(req.body.listing.location);
-
     if (!geoData) {
-      req.flash("error", `Invalid location: "${req.body.listing.location}". Please enter a valid city or address.`);
-      return res.redirect("/listings/new");
+        req.flash("error", "Invalid location");
+        return res.redirect("/listings/new");
     }
-     
-    const newListing = new Listing(req.body.listing);
+
+    const listing = req.body.listing; // <-- important!
+
+    // Convert checkboxes to boolean
+    listing.petsAllowed = listing.petsAllowed === 'on';
+    listing.smokingAllowed = listing.smokingAllowed === 'on';
+
+    const newListing = new Listing(listing);
     newListing.owner = req.user._id;
-    newListing.category = req.body.listing.category;
-    newListing.image = req.file
-      ? { url: req.file.path, filename: req.file.filename }
-      : { url: "/default-image.jpg", filename: "default" };
+    newListing.category = listing.category;
+
+    if (req.file) {
+        newListing.image = { url: req.file.path, filename: req.file.filename };
+    }
 
     newListing.geometry = {
-      type: "Point",
-      coordinates: [parseFloat(geoData.lon), parseFloat(geoData.lat)]
+        type: "Point",
+        coordinates: [parseFloat(geoData.lon), parseFloat(geoData.lat)]
     };
 
     await newListing.save();
-    req.flash("success", "New hotel created successfully!");
-    return res.redirect(`/listings/${newListing._id}`);
-  } catch (err) {
-    console.error(err);
-    req.flash("error", "Something went wrong while creating the hotel.");
-    return res.redirect("/listings/new");
-  }
+    req.flash("success", "Listing created!");
+    res.redirect(`/listings/${newListing._id}`);
 };
-
-// RENDER EDIT FORM
-module.exports.renderEditForm = async (req, res, next) => {
-  try {
+// ---------------- EDIT FORM ----------------
+module.exports.renderEditForm = async (req, res) => {
     const { id } = req.params;
     const listing = await Listing.findById(id);
-
+    
     if (!listing) {
-      req.flash("error", "Hotel not found");
-      return res.redirect("/listings");
+        req.flash("error", "Listing not found");
+        return res.redirect("/listings");
     }
-  let originalImageUrl=listing.image.url;
-    return res.render("listings/edit", { listing,originalImageUrl });
-  } catch (err) {
-    return next(err);
-  }
+
+    const originalImageUrl = listing.image?.url || "/images/default-listing.jpg";
+
+    res.render("listings/edit", { 
+        listing, 
+        currentUser: req.user,
+        originalImageUrl 
+    });
 };
 
-// UPDATE LISTING
-module.exports.updateListing = async (req, res, next) => {
-  try {
+
+// ---------------- UPDATE ----------------
+module.exports.updateListing = async (req, res) => {
     const { id } = req.params;
-
     const listing = await Listing.findById(id);
-
     if (!listing) {
-      req.flash("error", "Hotel not found.");
-      return res.redirect("/listings");
+        req.flash("error", "Listing not found");
+        return res.redirect("/listings");
     }
+
+    // Only update owner fields if currentUser is owner
+    if (req.user._id.toString() !== listing.owner.toString()) {
+        req.flash("error", "You are not authorized");
+        return res.redirect(`/listings/${id}`);
+    }
+
     const updatedData = req.body.listing;
-
-    // Update normal fields
     listing.title = updatedData.title;
     listing.description = updatedData.description;
     listing.price = updatedData.price;
-    listing.country = updatedData.country;
     listing.location = updatedData.location;
-    listing.category = updatedData.category;   // ⭐ Important
+    listing.country = updatedData.country;
+    listing.category = updatedData.category;
 
     // Update coordinates
     if (updatedData.location) {
-      const geoData = await getCoordinates(updatedData.location);
-      if (geoData) {
-        listing.geometry = {
-          type: "Point",
-          coordinates: [parseFloat(geoData.lon), parseFloat(geoData.lat)]
-        };
-      }
+        const geoData = await getCoordinates(updatedData.location);
+        if (geoData) {
+            listing.geometry = { type: "Point", coordinates: [parseFloat(geoData.lon), parseFloat(geoData.lat)] };
+        }
     }
 
-    // Update image only if new one uploaded
     if (req.file) {
-      listing.image = {
-        url: req.file.path,
-        filename: req.file.filename
-      };
+        listing.image = { url: req.file.path, filename: req.file.filename };
     }
 
     await listing.save();
-
-    req.flash("success", "Hotel updated successfully!");
-
-    // ⭐ Redirect to correct filtered category page
-    return res.redirect(`/listings?category=${listing.category}`);
-
-  } catch (err) {
-    console.error(err);
-    req.flash("error", "Something went wrong while updating the listing.");
-    return res.redirect(`/listings/${req.params.id}/edit`);
-  }
+    req.flash("success", "Listing updated!");
+    res.redirect(`/listings/${id}`);
 };
 
-
-// DELETE LISTING
-module.exports.destroyListing = async (req, res, next) => {
-  try {
+// ---------------- DELETE ----------------
+module.exports.destroyListing = async (req, res) => {
     const { id } = req.params;
-    const listing = await Listing.findByIdAndDelete(id);
-
+    const listing = await Listing.findById(id);
     if (!listing) {
-      req.flash("error", "Hotel not found");
-      return res.redirect("/listings");
+        req.flash("error", "Listing not found");
+        return res.redirect("/listings");
     }
 
-    req.flash("success", "Hotel Deleted");
-    return res.redirect("/listings");
-  } catch (err) {
-    return next(err);
-  }
+    // Only owner can delete
+    if (req.user._id.toString() !== listing.owner.toString()) {
+        req.flash("error", "You are not authorized");
+        return res.redirect(`/listings/${id}`);
+    }
+
+    await Listing.findByIdAndDelete(id);
+    req.flash("success", "Listing deleted");
+    res.redirect("/listings/my");
 };

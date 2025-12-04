@@ -3,6 +3,7 @@
 <div class="row mt-3">
   <div class="col-8 offset-2">
     <h3>Edit your Listing</h3>
+
     <form
       method="POST"
       action="/listings/<%= listing._id %>?_method=PUT"
@@ -10,22 +11,17 @@
       class="needs-validation"
       enctype="multipart/form-data"
     >
+
       <!-- TITLE -->
       <div class="mb-3">
-        <label for="title" class="form-label">Title</label>
-        <input
-          name="listing[title]"
-          value="<%= listing.title %>"
-          type="text"
-          class="form-control"
-          required
-        />
+        <label class="form-label">Title</label>
+        <input name="listing[title]" value="<%= listing.title %>" type="text" class="form-control" required />
         <div class="invalid-feedback">Title must be entered!</div>
       </div>
 
       <!-- DESCRIPTION -->
       <div class="mb-3">
-        <label for="description" class="form-label">Description</label>
+        <label class="form-label">Description</label>
         <textarea name="listing[description]" class="form-control" required><%= listing.description %></textarea>
         <div class="invalid-feedback">Please enter a short description</div>
       </div>
@@ -33,15 +29,14 @@
       <!-- CURRENT IMAGE -->
       <div class="mb-3">
         <label class="form-label">Current Image</label>
-        <img src="<%= originalImageUrl %>" class="img-fluid" style="width: 250px; object-fit: cover;" alt="Current Hotel Image">
+        <img src="<%= originalImageUrl %>" class="img-fluid" style="width: 250px; object-fit: cover;">
       </div>
 
-      <!-- NEW IMAGE UPLOAD + PREVIEW -->
+      <!-- NEW IMAGE + PREVIEW -->
       <div class="mb-3">
-        <label for="image" class="form-label">Upload New Image</label>
+        <label class="form-label">Upload New Image</label>
         <input type="file" name="image" class="form-control" onchange="previewImage(event)" />
-        <img id="preview" class="img-fluid mt-2" style="width: 250px; object-fit: cover; display:none;" alt="Preview Image"
-        required >
+        <img id="preview" class="img-fluid mt-2" style="width: 250px; object-fit: cover; display:none;" />
       </div>
 
       <script>
@@ -54,7 +49,7 @@
 
       <!-- CATEGORY -->
       <div class="mb-3">
-        <label for="category" class="form-label">Category</label>
+        <label class="form-label">Category</label>
         <select name="listing[category]" id="category" class="form-select">
           <% const categories = ["Room","Iconic Cities","Mountains","Castle","Arctic","Camping","Farms","Desert","Domes","Boats"]; %>
           <% categories.forEach(cat => { %>
@@ -66,57 +61,36 @@
       <!-- PRICE & COUNTRY -->
       <div class="row">
         <div class="mb-3 col-md-4">
-          <label for="price" class="form-label">Price</label>
-          <input
-            name="listing[price]"
-            value="<%= listing.price %>"
-            type="number"
-            class="form-control"
-            required
-          >
-          <div class="invalid-feedback">Price should be valid</div>
+          <label class="form-label">Price</label>
+          <input name="listing[price]" value="<%= listing.price %>" type="number" class="form-control" required>
         </div>
 
         <div class="mb-3 col-md-8">
-          <label for="country" class="form-label">Country</label>
-          <input
-            name="listing[country]"
-            value="<%= listing.country %>"
-            type="text"
-            class="form-control"
-            required
-          />
-          <div class="invalid-feedback">Country name should be valid</div>
+          <label class="form-label">Country</label>
+          <input name="listing[country]" value="<%= listing.country %>" type="text" class="form-control" required />
         </div>
       </div>
 
       <!-- LOCATION -->
       <div class="mb-3">
-        <label for="location" class="form-label">Location</label>
-        <input
-          name="listing[location]"
-          value="<%= listing.location %>"
-          type="text"
-          class="form-control"
-          required
-        >
-        <div class="invalid-feedback">Location should be valid</div>
+        <label class="form-label">Location</label>
+        <input name="listing[location]" value="<%= listing.location %>" type="text" class="form-control" required />
       </div>
 
-      <!-- EXTRA INFO: Guests, Check-in/out, Pets, Smoking -->
+      <!-- EXTRA INFO -->
       <div class="row">
         <div class="mb-3 col-md-4">
-          <label for="maxGuests" class="form-label">Max Guests</label>
+          <label class="form-label">Max Guests</label>
           <input type="number" name="listing[maxGuests]" value="<%= listing.maxGuests || '' %>" class="form-control">
         </div>
 
         <div class="mb-3 col-md-4">
-          <label for="checkIn" class="form-label">Check-in</label>
+          <label class="form-label">Check-in</label>
           <input type="text" name="listing[checkIn]" value="<%= listing.checkIn || '' %>" class="form-control">
         </div>
 
         <div class="mb-3 col-md-4">
-          <label for="checkOut" class="form-label">Check-out</label>
+          <label class="form-label">Check-out</label>
           <input type="text" name="listing[checkOut]" value="<%= listing.checkOut || '' %>" class="form-control">
         </div>
       </div>
@@ -131,7 +105,7 @@
         <label class="form-check-label" for="smokingAllowed">Smoking Allowed</label>
       </div>
 
-      <!-- SUBMIT BUTTON -->
+      <!-- SUBMIT -->
       <button class="btn edit-btn mt-3 w-100">Save Changes</button>
     </form>
   </div>
