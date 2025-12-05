@@ -1,27 +1,129 @@
 <% layout("layouts/boilerplate") %>
 
-<div class="container mt-4">
-  <h3>
-    Search results for: "<%= query %>"
-  </h3>
+<style>
+/* ------------------- CATEGORY BAR ------------------- */
+#filters-wrapper {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 50;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border-radius: 3rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  overflow: hidden;
+  flex-wrap: wrap;
+}
+#filters-left { display: flex; align-items: center; flex: 1; min-width: 0; }
+#filters-scroll {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  gap: 1.5rem;
+  padding: 0.2rem 0;
+  scrollbar-width: none;
+  min-width: 0;
+}
+#filters-scroll::-webkit-scrollbar { display: none; }
+.filter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.55;
+  cursor: pointer;
+  transition: 0.25s ease;
+  flex-shrink: 0;
+  padding: 0.3rem;
+}
+.filter i { font-size: 1.3rem; }
+.filter p { font-size: 0.75rem; margin-top: 0.15rem; font-weight: 500; }
+.filter.active { opacity: 1; border-bottom: 2px solid black; transform: scale(1.1); }
 
-  <div class="row mt-4">
-    <% if(listings.length === 0) { %>
-      <p>No listings found.</p>
-    <% } %>
+/* ------------------- CARDS ------------------- */
+.listing-card {
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s ease;
+}
+.listing-card:hover {
+  transform: scale(1.02);
+}
+.card-img-top {
+  width: 100%;
+  height: 15rem;
+  object-fit: cover;
+}
 
-    <% listings.forEach(l => { %>
-      <div class="col-md-4 mb-4">
-        <div class="card">
-          <img src="<%= l.image?.url || '/images/default.jpg' %>" class="card-img-top">
-          <div class="card-body">
-            <h5><%= l.title %></h5>
-            <p class="small text-muted"><%= l.location %>, <%= l.country %></p>
-            <p><strong>₹ <%= l.price %></strong></p>
-            <a href="/listings/<%= l._id %>" class="btn btn-primary">View</a>
-          </div>
+/* RESPONSIVE GRID */
+@media(max-width: 480px){
+  .row > .col { flex: 0 0 100%; max-width: 100%; }
+  .card-img-top { height: 10rem; }
+  .filter i { font-size: 1rem; }
+  .filter p { font-size: 0.6rem; }
+}
+@media(min-width:481px) and (max-width:768px){
+  .row > .col { flex: 0 0 50%; max-width: 50%; }
+  .card-img-top { height: 12rem; }
+}
+@media(min-width:769px) and (max-width:1024px){
+  .row > .col { flex: 0 0 33.3333%; max-width: 33.3333%; }
+  .card-img-top { height: 14rem; }
+}
+@media(min-width:1025px){
+  .row > .col { flex: 0 0 33.3333%; max-width: 33.3333%; }
+}
+</style>
+
+<!-- ------------------- CATEGORY SCROLL BAR ------------------- -->
+<div id="filters-wrapper" class="mb-4">
+  <div id="filters-left">
+    <div id="filters-scroll">
+      <% const categories = ["All","Trending","Room","Iconic Cities","Mountains","Castle","Arctic","Camping","Farms","Desert","Domes","Boats"]; %>
+      <% const icons = ["fa-layer-group","fa-fire","fa-bed","fa-city","fa-mountain","fa-chess-rook","fa-snowflake","fa-campground","fa-cow","fa-umbrella-beach","fa-igloo","fa-ship"]; %>
+      <% categories.forEach((cat,i)=>{ %>
+        <div class="filter" data-category="<%= cat %>">
+          <i class="fa-solid <%= icons[i] %>"></i>
+          <p><%= cat==="Iconic Cities"?"Cities":cat %></p>
         </div>
-      </div>
-    <% }) %>
+      <% }) %>
+    </div>
   </div>
 </div>
+
+<!-- ------------------- LISTINGS GRID ------------------- -->
+<div class="row mt-4 g-3">
+  <% if(listings.length === 0) { %>
+    <p>No listings found.</p>
+  <% } %>
+
+  <% listings.forEach(l => { %>
+    <div class="col">
+      <a href="/listings/<%= l._id %>" class="text-decoration-none text-dark">
+        <div class="card listing-card shadow-sm">
+          <img src="<%= l.image?.url || '/images/default.jpg' %>" class="card-img-top" alt="<%= l.title %>">
+          <div class="card-body">
+            <h5 class="card-title"><%= l.title %></h5>
+            <p class="small text-muted"><%= l.location %>, <%= l.country %></p>
+            <p><strong>₹ <%= l.price?.toLocaleString("en-IN") || "N/A" %></strong></p>
+          </div>
+        </div>
+      </a>
+    </div>
+  <% }) %>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // CATEGORY CLICK
+  document.querySelectorAll(".filter").forEach(filter => {
+    filter.addEventListener("click", () => {
+      document.querySelectorAll(".filter").forEach(f => f.classList.remove('active'));
+      filter.classList.add('active');
+      window.location.href = `/listings?category=${filter.dataset.category}&search=<%= query %>`;
+    });
+  });
+});
+</script>
