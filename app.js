@@ -27,6 +27,8 @@ const ExpressError = require("./Utils/ExpressError.js");
 const searchRoute = require("./routes/search");
 const filterRoutes = require("./routes/filter");
 
+
+
 const PORT = process.env.PORT || 8080;
 
 // ------------------ MONGODB ATLAS ------------------
@@ -71,11 +73,13 @@ app.use(session({
 app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
-
 
 // ------------------ GOOGLE ------------------
 passport.use(new GoogleStrategy({
@@ -133,7 +137,7 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 // ------------------ MIDDLEWARE ------------------
-app.use(express.urlencoded({ extended: true }));
+
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
 app.set("trust proxy", 1);  // render.com stuff
@@ -144,6 +148,7 @@ app.use("/listings/:id/reviews", reviewsRouter);
 app.use("/", userRouter);
 app.use("/search", searchRoute);
 app.use("/filter", filterRoutes);
+
 // ------------------ HOME ROUTE ------------------
 app.get("/", (req, res) => {
     res.redirect("/listings");
